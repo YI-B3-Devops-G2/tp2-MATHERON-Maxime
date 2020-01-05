@@ -1,0 +1,52 @@
+version: '3.1'
+
+services:
+    nodejs:
+      build:
+        context: ../
+        dockerfile: docker/nodejs/Dockerfile
+      container_name: tp_apinode
+      environment:
+        - NODE_ENV=production
+        - PORT=8080
+        - DB_USER=admin
+        - DB_PASSWORD=toor
+        - DB_NAME=tp_test
+        - DB_HOST=tp_postgres
+      ports:
+        - 8081:3000
+      depends_on:
+        - postgres
+      networks:
+        - subnet_db
+        - subnet_node
+    postgres:
+      image: postgres
+      container_name: tp_postgres
+      environment:
+        POSTGRES_DB: tp_test
+        POSTGRES_USER: admin
+        POSTGRES_PASSWORD: toor
+        PGDATA: /data/postgres
+      restart: unless-stopped
+      networks:
+        - subnet_db
+    redis:
+      image: redis
+      container_name: tp_redis
+      networks:
+        - subnet_db
+    nginx:
+      build:
+        context: ./nginx
+        dockerfile: Dockerfile
+      environment:
+        - HOSTNAME=tp_node:8080
+      networks:
+        - subnet_node
+      ports:
+        - 8080:80
+  
+networks:
+    subnet_db:
+    subnet_node:
