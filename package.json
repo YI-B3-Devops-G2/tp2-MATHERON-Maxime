@@ -1,17 +1,26 @@
 {
-  "name": "src",
+  "name": "tp2-MATHERON-maxime",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
-  },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
     "pg": "^7.14.0",
     "redis": "^2.8.0"
-  }
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YI-B3-Devops/tp2-MATHERON-Maxime.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/YI-B3-Devops/tp2-MATHERON-Maxime/issues"
+  },
+  "homepage": "https://github.com/YI-B3-Devops/tp2-MATHERON-Maxime#readme"
 }

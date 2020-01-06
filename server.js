@@ -1,50 +1,53 @@
-const express = require('express')
-const app = express();
-const { Client } = require('pg')
-const redis = require('redis')
+'use strict';
 
-const client = new Client({
-    user: process.env.DB_USER,
+const Pool = require('pg').Pool;
+const pool = new Pool({
     host: process.env.DB_HOST,
-    password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    port: 5432,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT,
 });
 
-client.connect().catch(e=>console.log(e));
-const redisClient = redis.createClient({ host: 'tp_redis' });
+const redis = require('redis');
+const client = redis.createClient({ host: process.env.REDIS_HOST });
 
-app.use(express.json());
+const express = require('express');
+const app = express();
 
+const port = process.env.API_PORT;
 
-app.get('/', function(req, res) {
-    res.json({ message: 'Hello World'});
+client.on('connect', function() {
+    console.log('Redis client connected');
 });
 
-app.get('/status', async function(req, res) {
-    const uptimePG = await client.query("SELECT date_trunc('second', current_timestamp - pg_postmaster_start_time()) as uptime;");
-    
-    const uptime = uptimePG.rows[0].uptime
+app.get('/', function (req, res) {
+    res.json({message: 'Hello World'})
+});
 
+app.get('/status', async (req, res) => {
+    const postgresQuery = 'SELECT date_trunc(\'second\', current_timestamp - pg_postmaster_start_time()) as uptime;';
+    const result = await pool.query(postgresQuery);
+    const uptime = result.rows[0].uptime;
     const uptimeString = () => {
-        let time = ""
-    
-        time += uptime.hours ? `${uptime.hours}h ` : ""
-        time += uptime.minutes ? `${uptime.minutes}m ` : ""
-        time += uptime.seconds ? `${uptime.seconds}s` : ""
-    
+        let time = '';
+
+        time += uptime.hours ? `${uptime.hours}h ` : '';
+        time += uptime.minutes ? `${uptime.minutes}m ` : '';
+        time += uptime.seconds ? `${uptime.seconds}s` : '';
+
         return time
-      }
+    };
 
-
-    res.json({ 
+    res.json({
         status: 'OK',
         postgresUptime: uptimeString(),
-        redisConnectedClients:Number(redisClient.server_info.connected_clients)
+        redisConnectedClients: Number(client.server_info.connected_clients)
     });
 });
 
-// start the app
-app.listen(3000, function() {
-    console.log("Express is running on port 3000");
+
+
+app.listen(port, () => {
+    console.log('We are live on ' + port);
 });
